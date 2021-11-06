@@ -1,9 +1,9 @@
 const { contactsModel } = require('../../model')
 
-const getContact = async (req, res, next) => {
+const readContact = async (req, res, next) => {
   const { contactId } = req.params
   try {
-    const contact = await contactsModel.getContactById(contactId)
+    const contact = await contactsModel.Contact.findById(contactId)
 
     contact
       ? res.json({
@@ -15,8 +15,9 @@ const getContact = async (req, res, next) => {
       })
       : res.status(404).json({ message: 'failure, no contact found' })
   } catch (error) {
-    console.log('Ошибка getContact')
+    console.log('Ошибка readContact')
+    next(error)
   }
 }
 
-module.exports = { getContact }
+module.exports = { readContact }
