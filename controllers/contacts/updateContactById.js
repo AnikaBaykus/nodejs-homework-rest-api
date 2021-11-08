@@ -1,12 +1,12 @@
 const { contactsModel } = require('../../model')
 
-const putContactById = async (req, res, next) => {
+const updateContactById = async (req, res, next) => {
   const { contactId } = req.params
   try {
     if (!Object.keys(req.body).includes('name' || 'email' || 'phone')) {
       return res.status(404).json({ message: 'missing fields' })
     } else {
-      const contact = await contactsModel.updateContact(contactId, req.body)
+      const contact = await contactsModel.Contact.findByIdAndUpdate(contactId, req.body)
 
       contact
         ? res.json({
@@ -20,8 +20,9 @@ const putContactById = async (req, res, next) => {
     }
     console.log(Object.keys(req.body))
   } catch (error) {
-    console.log('Ошибка putContact')
+    console.log('Ошибка updateContactById ')
+    next(error)
   }
 }
 
-module.exports = { putContactById }
+module.exports = { updateContactById }
