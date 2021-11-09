@@ -3,17 +3,16 @@ const router = express.Router()
 
 const { authControllers } = require('../../controllers')
 const { userModel } = require('../../model')
-const { validation } = require('../../middlewares')
+const { validation, controllerWrapper, authenticate } = require('../../middlewares')
 
 const validationUser = validation(userModel.joiUser)
-// const validationFavorite = validation(contactsModel.joiFavorite)
 
-router.post('/signup', validationUser, authControllers.registerUser)
+router.post('/signup', validationUser, controllerWrapper(authControllers.registerUser))
 
-router.post('/login', validationUser, authControllers.loginUser)
+router.post('/login', validationUser, controllerWrapper(authControllers.loginUser))
 
-// router.post('/logout', authControllers.logoutUser)
+router.post('/logout', controllerWrapper(authenticate), controllerWrapper(authControllers.logoutUser))
 
-// router.get('/current', authControllers.currentUser)
+router.get('/current', controllerWrapper(authenticate), controllerWrapper(authControllers.currentUser))
 
 module.exports = router

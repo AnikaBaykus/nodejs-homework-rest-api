@@ -1,31 +1,33 @@
 const { userModel } = require('../../model')
 const bcrypt = require('bcryptjs')
+const { Unauthorized } = require('http-errors')
+const jwt = require('jsonwebtoken')
 
 const loginUser = async(req, res, next) => {
-  try {
-    const { email, password, subscription } = req.body
-    const user = await userModel.User.findOne({ email })
-    console.log(user)
+  const { email, password, subscription } = req.body
+  const user = await userModel.User.findOne({ email })
 
-    const hashPassword = user.password
-    const compareResult = bcrypt.compareSync(password, hashPassword)
+  const hashPassword = user.password
+  const compareResult = bcrypt.compareSync(password, hashPassword)
 
-    if (!user || !compareResult) {
-      return res.status(401).json({ message: 'Email or password is wrong' })
-    }
-    const token = 'dknvmvkd.fdjoijmvfdo.'
-
-    res.status(200).json({
-      token: token,
-      user: {
-        email,
-        subscription,
-      }
-    })
-  } catch (error) {
-    console.log('Ошибка в залогине')
-    next(error)
+  if (!user || !compareResult) {
+    throw new Unauthorized('Email or password is wrong')
   }
+
+  const payload = {
+    id: user._id,
+  }
+  const { SECRET_KEY } = process.env
+  const token = jwt.sign(payload, SECRET_KEY)
+  await userModel.User.findByIdAndUpdate(user._id, { token })
+
+  res.status(200).json({
+    token: token,
+    user: {
+      email,
+      subscription,
+    }
+  })
 }
 
 module.exports = {
