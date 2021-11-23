@@ -1,0 +1,15 @@
+{
+ "password": "AntOn123$25",
+ "email": "anton@mail.ru",
+"subscription": "starter"
+}
+// {
+// "password": "Lida456$25",
+// "email": "lida@mail.ru",
+// "subscription": "pro",
+// },
+// {
+// "password": "Vova789$25",
+// "email": "vova@mail.ru",
+// "subscription": "pro",
+// }
