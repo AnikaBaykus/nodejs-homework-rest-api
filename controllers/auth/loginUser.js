@@ -6,12 +6,17 @@ const jwt = require('jsonwebtoken')
 const loginUser = async(req, res, next) => {
   const { email, password, subscription } = req.body
   const user = await userModel.User.findOne({ email })
-
+  console.log(password)
+  console.log(user)
   const hashPassword = user.password
-  const compareResult = bcrypt.compareSync(password, hashPassword)
+  const compareResult = await bcrypt.compareSync(password, hashPassword)
 
   if (!user || !compareResult) {
     throw new Unauthorized('Email or password is wrong')
+  }
+
+  if (!user.verify) {
+    throw new Unauthorized('Email not confirmed')
   }
 
   const payload = {

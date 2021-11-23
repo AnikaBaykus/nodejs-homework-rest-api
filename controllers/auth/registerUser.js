@@ -1,9 +1,12 @@
 const { userModel } = require('../../model')
 const bcrypt = require('bcryptjs')
 const { Conflict } = require('http-errors')
+const { v4: uuidv4 } = require('uuid')
+const { sendMail } = require('../../utils/mail')
 
 const fs = require('fs/promises')
 const path = require('path')
+const { PORT = 3000 } = process.env
 
 const gravatar = require('gravatar')
 
@@ -19,9 +22,24 @@ const registerUser = async(req, res, next) => {
   }
 
   const hashPassword = bcrypt.hashSync(password, bcrypt.genSaltSync(10))
-  const newUser = await userModel.User.create({ password: hashPassword, email, subscription, avatarURL: avatar })
+  const newUser = { password: hashPassword, email, subscription, avatarURL: avatar, verifyToken: uuidv4() }
 
-  const id = newUser._id.toString()
+  const { verifyToken } = newUser
+
+  const letter = {
+    to: '',
+    subject: 'Verification email',
+    html: `<h1>Hello</h1>
+    <p>You have successfully registered via mail ${email}.</br>
+    To verify your email address, follow the link </br>
+    <a href='http://localhost:${PORT}/api/users/verify/${verifyToken}'>click here</a>
+    </p>`
+  }
+
+  await sendMail(letter)
+  const createdUser = await userModel.User.create(newUser)
+
+  const id = createdUser._id.toString()
   const updatePatch = path.join(userDir, id)
   await fs.mkdir(updatePatch)
 
@@ -29,6 +47,7 @@ const registerUser = async(req, res, next) => {
     message: {
       email,
       subscription,
+      text: `<a href='http://localhost:${PORT}/api/users/verify/${verifyToken}'>click here</a>`
     }
   })
 }
